@@ -210,24 +210,33 @@ alt - 9 : yabai -m space --focus 9
 alt - 0 : yabai -m space --focus 0
 
 # make new space and go to it
-shift + cmd - n : yabai -m space --create && \
-                  index="$(yabai -m query --spaces --display | jq 'map(select(."is-native-fullscreen" == false))[-1].index')" && \
-                  yabai -m space --focus "${index}"
+cmd + shift - n : yabai -m space --create;\
+    index="$(yabai -m query --spaces --display | jq 'map(select(."is-native-fullscreen" == false))[-1].index')";\
+    yabai -m space --focus "${index}"
+
+# make new space and move current window to it and go there
+cmd + shift - m : yabai -m space --create;\
+        index="$(yabai -m query --spaces --display | jq 'map(select(."is-native-fullscreen" == false))[-1].index')";\
+		yabai -m window --space "${index}";\
+        yabai -m space --focus "${index}"
 
 # enter fullscreen mode for the focused container
 cmd - f : yabai -m window --toggle zoom-fullscreen
 
 # toggle window native fullscreen
 cmd + shift - f : yabai -m window --toggle native-fullscreen
-# open alacritty
-cmd - return : open -n /Applications/Alacritty.app
-cmd + shift - return : open -na "Google Chrome" --args --new-window --profile-directory="Default"
-cmd + ctrl - return : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1"
+
+# open iTerm new window
+cmd - return : osascript ~/.config/iterm2/AppSupport/Scripts/new-iterm-window.scpt
+
+# open chrome (different profiles)
+cmd + shift - return : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1"
+cmd + ctrl - return : open -na "Google Chrome" --args --new-window --profile-directory="Profile 2"
 
 # open vs code new window
 cmd - e : open -na /Applications/Visual\ Studio\ Code.app --args -n
 
-cmd + ctrl - c : open -na "Google Chrome" --args --new-window --profile-directory="Default" http://calendar.google.com;\
+cmd + ctrl - c : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1" http://calendar.google.com;\
 
 # float / unfloat window and center on screen
 cmd - o : yabai -m window --toggle float;\
