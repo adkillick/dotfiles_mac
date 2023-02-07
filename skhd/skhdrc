@@ -148,28 +148,23 @@
 cmd - d : open ~/Downloads
 
 # change focus
-cmd - h : yabai -m window --focus west || $(yabai -m display --focus west)
-cmd - j : yabai -m window --focus south || $(yabai -m display --focus south)
-cmd - k : yabai -m window --focus north || $(yabai -m display --focus north)
-cmd - l : yabai -m window --focus east || $(yabai -m display --focus east)
+cmd - h : yabai -m window --focus west || $(yabai -m display --focus west; while $(yabai -m window --focus east); do :; done)
+cmd - j : yabai -m window --focus south || $(yabai -m display --focus south; while $(yabai -m window --focus north); do :; done)
+cmd - k : yabai -m window --focus north || $(yabai -m display --focus north; while $(yabai -m window --focus south); do :; done)
+cmd - l : yabai -m window --focus east || $(yabai -m display --focus east; while $(yabai -m window --focus west); do :; done)
 
-# (alt) change focus (using arrow keys)
-cmd - left  : yabai -m window --focus west || $(yabai -m display --focus west)
-cmd - down  : yabai -m window --focus south || $(yabai -m display --focus south)
-cmd - up    : yabai -m window --focus north || $(yabai -m display --focus north)
-cmd - right : yabai -m window --focus east || $(yabai -m display --focus east)
+# shift window in current workspace holy hell
+cmd + shift - h : WIN_ID=$(yabai -m query --windows --window | jq '.id'); yabai -m window --warp west; [[ ! $? == 0 ]] &&\
+    (yabai -m window --display west; yabai -m window --focus $WIN_ID; while $(yabai -m window --warp east); do :; done;)
 
-# shift window in current workspace
-cmd + shift - h : yabai -m window --warp west || $(yabai -m window --display west; yabai -m display --focus west)
-cmd + shift - j : yabai -m window --warp south || $(yabai -m window --display south; yabai -m display --focus south)
-cmd + shift - k : yabai -m window --warp north || $(yabai -m window --display north; yabai -m display --focus north)
-cmd + shift - l : yabai -m window --warp east || $(yabai -m window --display east; yabai -m display --focus east)
+cmd + shift - j : WIN_ID=$(yabai -m query --windows --window | jq '.id'); yabai -m window --warp south; [[ ! $? == 0 ]] &&\
+    (yabai -m window --display south; yabai -m window --focus $WIN_ID; while $(yabai -m window --warp north); do :; done;)
 
-# alternatively, use the arrow keys
-cmd + shift - left : yabai -m window --swap west || $(yabai -m window --display west; yabai -m display --focus west)
-cmd + shift - down : yabai -m window --swap south || $(yabai -m window --display south; yabai -m display --focus south)
-cmd + shift - up : yabai -m window --swap north || $(yabai -m window --display north; yabai -m display --focus north)
-cmd + shift - right : yabai -m window --swap east || $(yabai -m window --display east; yabai -m display --focus east)
+cmd + shift - k : WIN_ID=$(yabai -m query --windows --window | jq '.id'); yabai -m window --warp north; [[ ! $? == 0 ]] &&\
+    (yabai -m window --display north; yabai -m window --focus $WIN_ID; while $(yabai -m window --warp south); do :; done;)
+
+cmd + shift - l : WIN_ID=$(yabai -m query --windows --window | jq '.id'); yabai -m window --warp east; [[ ! $? == 0 ]] &&\
+    (yabai -m window --display east; yabai -m window --focus $WIN_ID; while $(yabai -m window --warp west); do :; done;)
 
 # resize windows
 cmd + ctrl - h : yabai -m window --resize left:-20:0 || $(yabai -m window --resize right:-20:0)
@@ -221,7 +216,7 @@ cmd + shift - m : yabai -m space --create;\
         yabai -m space --focus "${index}"
 
 # enter fullscreen mode for the focused container
-cmd - f : yabai -m window --toggle zoom-fullscreen
+ctrl - f : yabai -m window --toggle zoom-fullscreen
 
 # toggle window native fullscreen
 cmd + shift - f : yabai -m window --toggle native-fullscreen
@@ -230,15 +225,23 @@ cmd + shift - f : yabai -m window --toggle native-fullscreen
 cmd - return : osascript ~/.config/iterm2/AppSupport/Scripts/new-iterm-window.scpt
 
 # open chrome (different profiles)
-cmd + shift - return : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1"
-cmd + ctrl - return : open -na "Google Chrome" --args --new-window --profile-directory="Profile 2"
+cmd + shift - return : S_IDX=$(yabai -m query --spaces --space | jq '.index');\
+    (open -na "Google Chrome" --args --new-window --profile-directory="Profile 1" &&\
+    yabai -m window --space $S_IDX);
+
+cmd + ctrl - return : S_IDX=$(yabai -m query --spaces --space | jq '.index');\
+    (open -na "Google Chrome" --args --new-window --profile-directory="Profile 2" &&\
+    yabai -m window --space $S_IDX);
 
 # open vs code new window
 cmd - e : open -na /Applications/Visual\ Studio\ Code.app --args -n
 
-cmd + ctrl - c : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1" http://calendar.google.com;\
+# open chrome (work profile) and go to calendar
+cmd + ctrl - c : open -na "Google Chrome" --args --new-window --profile-directory="Profile 1" http://calendar.google.com;
+
+# open messages
+cmd - i: open -a "Messages";
 
 # float / unfloat window and center on screen
 cmd - o : yabai -m window --toggle float;\
           yabai -m window --grid 4:4:1:1:2:2
-

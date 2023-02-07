@@ -9,4 +9,3 @@ disable system integrity
 install yabai
 install skhd
 
-
